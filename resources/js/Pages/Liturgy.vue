@@ -25,26 +25,30 @@
       <div class="container q-px-xl">
         <q-card v-if="hasReadings" class="q-mt-lg q-mx-md" :class="{ 'bg-grey-10 shadow-0': darkMode }">
           <q-card-section>
-            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgy1" :style="{ fontSize: `${font_size}px` }"></div>
+            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgy1"
+              :style="{ fontSize: `${font_size}px` }"></div>
           </q-card-section>
         </q-card>
 
         <q-card v-if="hasReadings" class="q-mt-lg q-mx-md" :class="{ 'bg-grey-10 shadow-0': darkMode }">
           <q-card-section>
-            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgypsalms" :style="{ fontSize: `${font_size}px` }"></div>
+            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgypsalms"
+              :style="{ fontSize: `${font_size}px` }"></div>
           </q-card-section>
         </q-card>
 
         <q-card v-if="liturgy_today?.liturgy2 != '' && liturgy_today?.liturgy2 != null" class="q-mt-lg q-mx-md"
           :class="{ 'bg-grey-10 shadow-0': darkMode }">
           <q-card-section>
-            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgy2" :style="{ fontSize: `${font_size}px` }"></div>
+            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgy2"
+              :style="{ fontSize: `${font_size}px` }"></div>
           </q-card-section>
         </q-card>
 
         <q-card v-if="hasReadings" class="q-my-lg q-mx-md" :class="{ 'bg-grey-10 shadow-0': darkMode }">
           <q-card-section>
-            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgygospel" :style="{ fontSize: `${font_size}px` }"></div>
+            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgygospel"
+              :style="{ fontSize: `${font_size}px` }"></div>
           </q-card-section>
         </q-card>
       </div>
@@ -58,19 +62,15 @@
             label="Aumentar fonte" />
         </q-fab>
       </q-page-sticky>
-
-      <q-toolbar class="bg-grey-1 text-white shadow-4 q-py-md q-ma-none row z-10" :class="{ 'bg-grey-10 shadow-0': darkMode }">
+    </q-page-container>
+    <q-toolbar class="bg-grey-1 text-white shadow-4 q-py-md q-ma-none row z-10"
+      :class="{ 'bg-grey-10 shadow-0': darkMode }">
       <div class="col text-subtitle1 text-center" :class="{ 'text-black': !darkMode }">
         Desenvolvido com ❤️ por
         <a href="https://galhardo.dev/" target="_blank">Thiago Galhardo</a>
       </div>
       <q-space />
     </q-toolbar>
-    </q-page-container>
-
-
-
-
   </q-layout>
 </template>
 
