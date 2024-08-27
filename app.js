@@ -22,30 +22,6 @@ import "quasar/src/css/index.sass";
 const appName =
     window.document.getElementsByTagName("title")[0]?.innerText || "Laravel";
 
-// const light = {
-//     dark: false,
-//     colors: {
-//         primary: "#6200EE",
-//     },
-// };
-
-// const dark = {
-//     dark: true,
-//     colors: {
-//         primary: "#000",
-//     },
-// };
-
-// const vuetify = createVuetify({
-//     components,
-//     directives,
-//     theme: {
-//         themes: {
-//             light,
-//             dark,
-//         },
-//     },
-// });
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
