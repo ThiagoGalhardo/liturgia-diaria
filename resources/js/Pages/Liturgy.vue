@@ -9,7 +9,7 @@
           Diária</div>
         <q-space />
 
-        <q-toggle class="q-pr-md q-py-xs" color="purple-10" dense keep-color v-model="darkMode"
+        <q-toggle class="q-pr-md q-py-xs" color="primary" dense keep-color v-model="darkMode"
           checked-icon="mdi-weather-night" unchecked-icon="mdi-white-balance-sunny" size="lg" />
       </q-toolbar>
     </q-header>
@@ -56,7 +56,7 @@
       <q-page-sticky position="bottom-right z-20" :offset="[18, 18]">
         <q-fab class=" q-mr-sm q-mb-lg" v-model="fab_right" vertical-actions-align="right" color="primary"
           icon="zoom_in" direction="up">
-          <q-fab-action label-position="left" color="secondary" @click="decreaseFontSize" icon="remove"
+          <q-fab-action label-position="left" color="blue-grey-7" @click="decreaseFontSize" icon="remove"
             label="Diminuir fonte" />
           <q-fab-action label-position="left" color="primary" @click="increaseFontSize" icon="add"
             label="Aumentar fonte" />
@@ -96,12 +96,14 @@ const font_size = ref(18)
 const increaseFontSize = () => {
   font_size.value++
   fab_right.value = true
+  $q.localStorage.set("fontSize", font_size.value)
 }
 
 const decreaseFontSize = () => {
   if (font_size.value > 1) {
     font_size.value--
     fab_right.value = true
+    $q.localStorage.set("fontSize", font_size.value)
   }
 }
 
@@ -116,7 +118,9 @@ watch(darkMode, (darkMode) => {
 
 onMounted(() => {
   const darkModeIsActive = $q.localStorage.getItem("darkMode")
+  const isFontSize = $q.localStorage.getItem("fontSize")
   if (darkModeIsActive) darkMode.value = true
+  if (isFontSize) font_size.value = isFontSize
 })
 
 </script>
