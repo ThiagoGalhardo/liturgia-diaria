@@ -15,7 +15,7 @@ class CreateScraperTable extends Migration
     {
         Schema::create('liturgies', function (Blueprint $table) {
             $table->id();
-            $table->text('day');
+            $table->date('day');
             $table->text('liturgy1');
             $table->text('liturgy2')->nullable();
             $table->text('liturgypsalms');
