@@ -20,4 +20,5 @@ require __DIR__ . '/auth.php';
 
 
 
-Route::get('/', [ScraperController::class, 'index'])->name('index');
+Route::get('/', [ScraperController::class, 'index'])->name('liturgy.index');
+Route::get('/{date}', [ScraperController::class, 'show'])->name('liturgy.show');
