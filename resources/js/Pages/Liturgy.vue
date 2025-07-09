@@ -1,127 +1,89 @@
 <template>
-  <q-layout view="lHh lpr lFf">
-    <q-header>
-      <q-toolbar elevated class="bg-grey-1 text-white shadow-2 q-py-md q-ma-none"
-        :class="{ 'bg-grey-10 shadow-0': darkMode }">
-        <q-img src="img/nossa-senhora-aparecida.webp" width="42px" class="q-ml-md"></q-img>
-
-        <div class="q-ml-md text-subtitle1 text-weight-bold" :class="{ 'text-black': !darkMode }">Liturgia
-          Diária</div>
-        <q-space />
-
-        <q-toggle class="q-pr-md q-py-xs" color="primary" dense keep-color v-model="darkMode"
-          checked-icon="mdi-weather-night" unchecked-icon="mdi-white-balance-sunny" size="lg" />
-      </q-toolbar>
-    </q-header>
+  <q-layout view="hHh lpR fFf">
+    <AppHeader v-model:date-selected="dateSelected" v-model:dark-mode="darkMode" />
 
     <q-page-container class="page-container q-mx-xl q-px-xl">
 
-      <Error v-if="!hasReadings" />
-      <Skeleton v-if="!hasReadings" :class="{ 'bg-grey-10 shadow-0': darkMode }" />
-      <Skeleton v-if="!hasReadings" :class="{ 'bg-grey-10 shadow-0': darkMode }" />
-      <Skeleton v-if="!hasReadings" :class="{ 'bg-grey-10 shadow-0': darkMode }" />
+      <template v-if="!hasReadings || errorMessage">
+        <Error :message="errorMessage || 'Não foi possível carregar as leituras para esta data.'" :showDate="true" />
+      </template>
+      <template v-else-if="loading">
+        <Skeleton :class="{ 'bg-grey-10 shadow-0': darkMode }" />
+        <Skeleton :class="{ 'bg-grey-10 shadow-0': darkMode }" />
+        <Skeleton :class="{ 'bg-grey-10 shadow-0': darkMode }" />
+      </template>
 
+      <div v-else class="container q-px-xl">
+        <q-banner v-if="dateSelected != moment().format('YYYY-MM-DD') && !continueAnotherDate"
+          class="q-mt-lg  q-mx-md shadow-1" :class="darkMode ? ' text-white' : 'bg-blue-grey-1 text-dark'" inline-actions>Gostaria de ler a liturgia de hoje {{
+            moment().format('DD/MM/YYYY') }}?
+          <template v-slot:action>
+            <q-btn :color="darkMode ? 'blue-grey-9' : 'blue-grey-6'" label="Não" class="q-mr-sm" @click="continueAnotherDate = true" />
+            <q-btn color="primary" label="Sim" @click="dateSelected = moment().format('YYYY-MM-DD')" />
+          </template>
+        </q-banner>
 
-      <div class="container q-px-xl">
-        <q-card v-if="hasReadings" class="q-mt-lg q-mx-md" :class="{ 'bg-grey-10 shadow-0': darkMode }">
-          <q-card-section>
-            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgy1"
-              :style="{ fontSize: `${font_size}px` }"></div>
-          </q-card-section>
-        </q-card>
-
-        <q-card v-if="hasReadings" class="q-mt-lg q-mx-md" :class="{ 'bg-grey-10 shadow-0': darkMode }">
-          <q-card-section>
-            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgypsalms"
-              :style="{ fontSize: `${font_size}px` }"></div>
-          </q-card-section>
-        </q-card>
-
-        <q-card v-if="liturgy_today?.liturgy2 != '' && liturgy_today?.liturgy2 != null" class="q-mt-lg q-mx-md"
-          :class="{ 'bg-grey-10 shadow-0': darkMode }">
-          <q-card-section>
-            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgy2"
-              :style="{ fontSize: `${font_size}px` }"></div>
-          </q-card-section>
-        </q-card>
-
-        <q-card v-if="hasReadings" class="q-my-lg q-mx-md" :class="{ 'bg-grey-10 shadow-0': darkMode }">
-          <q-card-section>
-            <div class="text-h6 liturgy-content" v-html="liturgy_today.liturgygospel"
-              :style="{ fontSize: `${font_size}px` }"></div>
-          </q-card-section>
-        </q-card>
+        <LiturgyCard :content="sanitizedLiturgy1" :font-size="fontSize" :dark-mode="darkMode" />
+        <LiturgyCard v-if="hasReadings" :content="sanitizedLiturgyPsalms" :font-size="fontSize" :dark-mode="darkMode" />
+        <LiturgyCard v-if="sanitizedLiturgy2" :content="sanitizedLiturgy2" :font-size="fontSize" :dark-mode="darkMode" />
+        <LiturgyCard v-if="hasReadings" :content="sanitizedLiturgyGospel" :font-size="fontSize" :dark-mode="darkMode" class="q-my-lg" />
       </div>
 
-      <q-page-sticky position="bottom-right z-20" :offset="[18, 18]">
-        <q-fab class=" q-mr-sm q-mb-lg" v-model="fab_right" vertical-actions-align="right" color="primary"
-          icon="zoom_in" direction="up">
-          <q-fab-action label-position="left" color="blue-grey-7" @click="decreaseFontSize" icon="remove"
-            label="Diminuir fonte" />
-          <q-fab-action label-position="left" color="primary" @click="increaseFontSize" icon="add"
-            label="Aumentar fonte" />
-        </q-fab>
-      </q-page-sticky>
+      <ZoomFab @increase-font="increaseFontSize" @decrease-font="decreaseFontSize" />
+    
     </q-page-container>
-    <q-toolbar class="bg-grey-1 text-white shadow-4 q-py-md q-ma-none row z-10"
-      :class="{ 'bg-grey-10 shadow-0': darkMode }">
-      <div class="col text-subtitle1 text-center" :class="{ 'text-black': !darkMode }">
-        Desenvolvido com ❤️ por
-        <a href="https://galhardo.dev/" target="_blank">Thiago Galhardo</a>
-      </div>
-      <q-space />
-    </q-toolbar>
+
+    <AppFooter :dark-mode="darkMode" />
   </q-layout>
 </template>
 
 
 <script setup>
-import { useQuasar, Screen } from "quasar";
-import { ref, watch, onMounted, computed } from "vue";
+import { computed } from "vue";
+import moment from 'moment'
+import DOMPurify from 'dompurify';
+
+import { useLiturgy } from '@/composables/useLiturgy';
+
 import Skeleton from "../Components/Skeleton.vue"
 import Error from "../Components/Error.vue"
+import LiturgyCard from "../Components/LiturgyCard.vue";
+import AppHeader from "../Components/AppHeader.vue";
+import AppFooter from "../Components/AppFooter.vue";
+import ZoomFab from "../Components/ZoomFab.vue";
 
 const props = defineProps({
-  liturgy_today: {
+  liturgies: {
     type: Object,
     default: () => ({}),
   },
-})
-
-const $q = useQuasar()
-const darkMode = ref(false)
-const fab_right = ref(false)
-const font_size = ref(18)
-
-const increaseFontSize = () => {
-  font_size.value++
-  fab_right.value = true
-  $q.localStorage.set("fontSize", font_size.value)
-}
-
-const decreaseFontSize = () => {
-  if (font_size.value > 1) {
-    font_size.value--
-    fab_right.value = true
-    $q.localStorage.set("fontSize", font_size.value)
+  error: {
+    type: String,
+    default: '',
+  },
+  date: {
+    type: String,
+    default: () => moment().format('YYYY-MM-DD')
   }
-}
-
-const hasReadings = () => {
-  if (props.liturgy_today) return true
-}
-
-watch(darkMode, (darkMode) => {
-  $q.dark.set(darkMode)
-  $q.localStorage.set("darkMode", darkMode)
 })
 
-onMounted(() => {
-  const darkModeIsActive = $q.localStorage.getItem("darkMode")
-  const isFontSize = $q.localStorage.getItem("fontSize")
-  if (darkModeIsActive) darkMode.value = true
-  if (isFontSize) font_size.value = isFontSize
-})
+const { 
+  darkMode, 
+  fontSize, 
+  dateSelected, 
+  loading, 
+  errorMessage, 
+  continueAnotherDate, 
+  increaseFontSize, 
+  decreaseFontSize, 
+  hasReadings 
+} = useLiturgy(props);
+
+// Sanitized Computed Properties
+const sanitizedLiturgy1 = computed(() => DOMPurify.sanitize(props.liturgies.liturgy1));
+const sanitizedLiturgyPsalms = computed(() => DOMPurify.sanitize(props.liturgies.liturgypsalms));
+const sanitizedLiturgy2 = computed(() => props.liturgies.liturgy2 ? DOMPurify.sanitize(props.liturgies.liturgy2) : null);
+const sanitizedLiturgyGospel = computed(() => DOMPurify.sanitize(props.liturgies.liturgygospel));
 
 </script>
 
