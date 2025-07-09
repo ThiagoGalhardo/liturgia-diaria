@@ -9,5 +9,5 @@ class Liturgy extends Model
 {
     protected $table = 'liturgies';
     use HasFactory;
-    protected $fillable = ['dia', 'leitura1', 'leitura2', 'salmos', 'evangelho'];
+    protected $fillable = ['day', 'liturgy1', 'liturgy2', 'liturgypsalms', 'liturgygospel'];
 }
