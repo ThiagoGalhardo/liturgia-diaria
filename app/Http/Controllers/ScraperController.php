@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Goutte\Client;
+use Symfony\Component\BrowserKit\HttpBrowser;
+use Symfony\Component\HttpClient\HttpClient;
 use Inertia\Inertia;
 use App\Models\Liturgy;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-
 class ScraperController extends Controller
 {
     public function index()
@@ -18,7 +17,7 @@ class ScraperController extends Controller
         $cacheKey = "liturgy_{$today}";
 
         // Use data from cache, if it exists
-        $liturgy_today = Cache::remember($cacheKey, Carbon::now()->endOfDay(), function () use ($today) {
+        $liturgies = Cache::remember($cacheKey, Carbon::now()->endOfDay(), function () use ($today) {
             $threeDaysLater = Carbon::now()->addDays(3);
 
             // Check if we have liturgies for the next 3 days
@@ -31,12 +30,35 @@ class ScraperController extends Controller
             return Liturgy::where("day", $today)->first();
         });
 
-        return Inertia::render('Liturgy', compact('liturgy_today'));
+        return Inertia::render('Liturgy', [
+            'liturgies' => $liturgies,
+            'date' => $today
+        ]);
+    }
+
+    public function show($date)
+    {
+        $liturgies = Liturgy::where('day', $date)->first();
+
+        if (!$liturgies) {
+            return Inertia::render('Liturgy', [
+                'liturgies' => (object)['liturgy1' => '', 'liturgy2' => '', 'liturgypsalms' => '', 'liturgygospel' => ''],
+                'error' => 'Liturgia não encontrada para a data selecionada.',
+                'date' => $date
+            ]);
+        }
+
+        return Inertia::render('Liturgy', [
+            'liturgies' => $liturgies,
+            'date' => $date,
+        ]);
     }
 
     public function scraper()
     {
-        $client = new Client();
+        set_time_limit(120);
+        
+        $client = new HttpBrowser(HttpClient::create());
         $url = 'https://liturgia.cancaonova.com/pb/';
         $page = $client->request('GET', $url);
 
@@ -76,7 +98,7 @@ class ScraperController extends Controller
                         $liturgyDataBase->liturgygospel = $liturgyData['liturgygospel'];
                         $liturgyDataBase->save();
 
-                        Log::info("Created liturgy data for date: $date");
+                        // Log::info("Created liturgy data for date: $date");
                     } catch (\Exception $e) {
                         Log::error("Failed to create liturgy for date $date: " . $e->getMessage());
                     }
@@ -87,7 +109,7 @@ class ScraperController extends Controller
 
     private function scrapeLiturgyPage($url)
     {
-        $client = new Client();
+        $client = new HttpBrowser(HttpClient::create());
         $page = $client->request('GET', $url);
 
         $liturgy1 = $page->filter('#liturgia-1')->count() > 0 ? $this->removeEmbeddedAudio($page->filter('#liturgia-1')->html()) : '';
